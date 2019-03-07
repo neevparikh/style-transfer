@@ -130,7 +130,18 @@ cnn = models.vgg19(pretrained=True).features.to(device).eval()
 def build_model(cnn, norm_mean, norm_std, style_img, content_img,
                 content_layers=content_layers_default, 
                 style_layers=style_layers_default):
-    
+    """ Builds the model from the VGG19 pretrained model
+    Inputs:
+        cnn :: Pretrained CNN model
+        norm_mean, norm_std :: Pytorch tensor
+        style_img, content_img :: Pytorch tensor
+        content_layers, style_layers :: List
+    Outputs:
+        model :: Modified model with transparent loss layers added
+        content_loss_obj :: Content loss objects
+        style_loss_obj :: Style loss objects
+    """
+
     cnn = deepcopy(cnn)
     norm = Normalization(norm_mean, norm_std).to(device)
     model = nn.Sequential(norm)
@@ -183,6 +194,18 @@ def train_model(cnn, norm_mean, norm_std, content_img, style_img,
                 input_img, num_iter=300, style_weight=10e6, content_weight=1,
                 content_layers=content_layers_default,
                 style_layers=style_layers_default):
+    """ Trains the model to optimize input image to minimize total loss
+    Input:
+        cnn :: Pretrained CNN model
+        norm_mean, norm_std :: Pytorch tensor
+        style_img, content_img, input_img :: Pytorch tensor
+        content_layers, style_layers :: List
+        style_weight, content_weight :: Float
+        num_iter :: Integer
+    Output:
+        input_img :: Pytorch tensor 
+        c_loss_history, s_loss_history :: List
+    """
     
     optimizer = optim.LBFGS([input_img.requires_grad_()])
     
